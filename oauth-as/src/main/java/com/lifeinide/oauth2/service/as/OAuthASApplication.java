@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * External oauth2 client example.
+ * Oauth2 authorization server.
  *
  * @author Lukasz Frankowski (lifeinide.com)
  */

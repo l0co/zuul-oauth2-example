@@ -6,7 +6,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 
 /**
- * External oauth2 client example.
+ * Oauth2 resource server.
  *
  * @author Lukasz Frankowski (lifeinide.com)
  */
