@@ -1,10 +1,13 @@
 package com.lifeinide.oauth2.service.as;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,8 +18,10 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
@@ -27,15 +32,19 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @SpringBootApplication
 @EnableAuthorizationServer
 @EnableResourceServer
-public class OAuthASApplication extends WebSecurityConfigurerAdapter implements AuthorizationServerConfigurer {
+@EnableWebSecurity
+public class OAuthASApplication implements AuthorizationServerConfigurer, ResourceServerConfigurer {
 
 	/**********************************************************************************************************
 	 * Some additional beans we need
 	 **********************************************************************************************************/
 
+	@Autowired protected AuthenticationManager authenticationManager;
+
 	/**
 	 * Example user details service, in real life connected to some db.
 	 */
+	@SuppressWarnings("deprecation")
 	@Bean
 	public UserDetailsService userDetailsService() {
 		return new InMemoryUserDetailsManager(
@@ -54,6 +63,7 @@ public class OAuthASApplication extends WebSecurityConfigurerAdapter implements 
 
 		);
 	}
+
 
 	/**********************************************************************************************************
 	 * {@link AuthorizationServerConfigurer} = configuration for oauth2 authorization server
@@ -114,6 +124,7 @@ public class OAuthASApplication extends WebSecurityConfigurerAdapter implements 
 	 * client to encode password before sends it, because it makes no sense. This default encoder for
 	 * {@link AuthorizationServerSecurityConfigurer} looks like a spring security oauth2 glitch.
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 		security.passwordEncoder(NoOpPasswordEncoder.getInstance());
@@ -135,47 +146,56 @@ public class OAuthASApplication extends WebSecurityConfigurerAdapter implements 
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints
-			.authenticationManager(authenticationManagerBean())
+			.authenticationManager(authenticationManager)
 			.userDetailsService(userDetailsService())
 			.reuseRefreshTokens(false);
 
 	}
 
 	/**********************************************************************************************************
-	 * {@link WebSecurityConfigurerAdapter} = another security configuration :)
-	 *
-	 * This is the most difficult to understand in this whole architecture that we have multiple layers of security,
-	 * while we even don't have here resource server (it's in separated service). For authorization server WITH resource
-	 * server we will have 3 layers of configuration and two layers of security :) Here we have only two:
-	 *
-	 * 1) AuthorizationServerConfigurer - configuration for authorization server (clients, tokens etc)
-	 * 2) WebSecurityConfigurerAdapter - this is the layer provoding two things:
-	 *    - authentication manager
-	 *    - rules how we protect {@code /oauth/**} endpoints with standard spring security concepts
+	 * {@link ResourceServerConfigurer} = security configuration.
 	 **********************************************************************************************************/
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	public void configure(HttpSecurity http) throws Exception {
 		http
 			.authorizeRequests()
-			.anyRequest()
-			.authenticated();
+				.antMatchers("/", "/login")
+				.permitAll()
+				.and()
+			.authorizeRequests()
+				.anyRequest()
+				.authenticated()
+				.and()
+			.formLogin()
+				.permitAll();
 	}
 
-	/**
-	 * This bean needs to be manually exposed due to custom UserDetailsService in {@link #userDetailsService()}.
-	 * See https://github.com/spring-projects/spring-boot/issues/11136
-	 */
-	@Bean
 	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
+	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 	}
 
+	/**********************************************************************************************************
+	 * {@link WebSecurityConfigurerAdapter} = another security configuration?
+	 *
+	 * This is the most obscure thing I've met in this whole config. This class is not intended to be used in
+	 * oauth2 config, however there's now no other way to access authentication manager bean.
+	 * See https://github.com/spring-projects/spring-boot/issues/11136
+	 **********************************************************************************************************/
+
+	@Configuration
+	public static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
+
+		@Bean
+		@Override
+		public AuthenticationManager authenticationManagerBean() throws Exception {
+			return super.authenticationManagerBean();
+		}
+		
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(OAuthASApplication.class, args);
 	}
-
 
 }
