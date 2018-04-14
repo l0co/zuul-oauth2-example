@@ -24,7 +24,31 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
- * Oauth2 authorization server. We split the API examples into following scopes:
+ * Oauth2 authorization server. We split the API examples into two clients:
+ *
+ * <h2>Internal client</h2>
+ * <p>
+ * First one will be used for internal client authorization. Internal client is the one we trust to get username and password from user
+ * and usually it's out own web or mobile ui. For this client we'd like the application to work in the same way as the
+ * default application authorized by session and cookie. I.e. we want the client to be automatically logged out in 30 mins after the
+ * last click in the app.
+ * </p>
+ *
+ * <h2>External client</h2>
+ * <p>
+ * The second one is an example of how to connect app with external applications, which are those we don't trust to get username and
+ * password from the user and they work with access token oauth2 workflow instead with seaprate scopes approval. This application we
+ * want to get access token for longer time and be only once authorized and then to have contant access to our API. Only if the user
+ * doesn't use it for 14 or more days, we log him out and require second authorization after he is back.
+ * </p>
+ *
+ * <h2>With following scopes</h2>
+ *
+ * <ol>
+ *     <li>account - access to user account data</li>
+ *     <li>contacts - can get contacts list</li>
+ *     <li>internal - can do things only internal client can do (like change password)</li>
+ * </ol>
  *
  * @author Lukasz Frankowski (lifeinide.com)
  */
@@ -51,12 +75,6 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 				.username("user")
 				.password("user")
 				.authorities("ROLE_USER")
-				.build(),
-
-			User.withDefaultPasswordEncoder()
-				.username("admin")
-				.password("admin")
-				.authorities("ROLE_ADMIN")
 				.build()
 
 		);
@@ -69,22 +87,6 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 
 	/**
 	 * Sets up two oauth2 clients.
-	 *
-	 * <h2>Internal client</h2>
-	 * <p>
-	 * First one will be used for internal client authorization. Internal client is the one we trust to get username and password from user
-	 * and usually it's out own web or mobile ui. For this client we'd like the application to work in the same way as the
-	 * default application authorized by session and cookie. I.e. we want the client to be automatically logged out in 30 mins after the
-	 * last click in the app.
-	 * </p>
-	 *
-	 * <h2>External client</h2>
-	 * <p>
-	 * The second one is an example of how to connect app with external applications, which are those we don't trust to get username and
-	 * password from the user and they work with access token oauth2 workflow instead with seaprate scopes approval. This application we
-	 * want to get access token for longer time and be only once authorized and then to have contant access to our API. Only if the user
-	 * doesn't use it for 14 or more days, we log him out and require second authorization after he is back.
-	 * </p>
 	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
