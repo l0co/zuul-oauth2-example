@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -97,7 +98,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 
 			.withClient("internal")
 			.secret("internal_secret")
-			.scopes("account", "settings", "contacts", "internal")
+			.scopes("account", "contacts", "internal")
 			.resourceIds()
 			.authorizedGrantTypes("refresh_token", "password") // to get the access token uses directly username+password
 			.autoApprove(true) // all scopes are auto approved for internal client (no scopes approval view is displayed)
@@ -109,7 +110,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 
 			.withClient("external")
 			.secret("external_secret")
-			.scopes("account", "settings", "contacts") // does not have internal scope which is only for internal clients
+			.scopes("account", "contacts") // does not have internal scope which is only for internal clients
 			.authorizedGrantTypes("authorization_code", "refresh_token") // to get the access token uses authorization code workflow
 			.autoApprove(false) // all scopes need to be approved manually
 			.accessTokenValiditySeconds(30*60) // by default for the external client access token will expiry after 30 min
@@ -159,8 +160,11 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		http
+			.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.NEVER)
+				.and()
 			.authorizeRequests()
-				.antMatchers("/", "/login")
+				.antMatchers("/", "/login", "/favicon.ico")
 				.permitAll()
 				.and()
 			.authorizeRequests()
@@ -169,6 +173,10 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 				.and()
 			.formLogin()
 				.permitAll();
+
+		// TODOLF the next problem is that user authenticates with whitelabel login form but security context is stored in
+		// TODOLF NullSecurityContextRepository here:
+//		http.securityContext().securityContextRepository()
 	}
 
 	@Override
