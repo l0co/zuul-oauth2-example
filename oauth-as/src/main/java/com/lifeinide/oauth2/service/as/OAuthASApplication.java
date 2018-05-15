@@ -173,6 +173,10 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 				.authenticated()
 				.and()
 			.formLogin()
+				// TODOLF this doesn't set login redirect URL,please check LoginUrlAuthenticationEntryPoint:96 and 175, there
+				// TODOLF are three LoginUrlAuthenticationEntryPoint, but only one will get this URL, the rest of the stays with
+				// TODOLF /login and this is still used in authentication
+				.loginPage("http://localhost:8080/as/login")
 				.permitAll();
 	}
 
