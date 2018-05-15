@@ -161,6 +161,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	public void configure(HttpSecurity http) throws Exception {
 		http
 			.sessionManagement()
+				// without this login form doesn't work because http.securityContext().securityContextRepository()==NullSecurityContextRepository
 				.sessionCreationPolicy(SessionCreationPolicy.NEVER)
 				.and()
 			.authorizeRequests()
@@ -173,10 +174,6 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 				.and()
 			.formLogin()
 				.permitAll();
-
-		// TODOLF the next problem is that user authenticates with whitelabel login form but security context is stored in
-		// TODOLF NullSecurityContextRepository here:
-//		http.securityContext().securityContextRepository()
 	}
 
 	@Override
