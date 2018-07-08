@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -25,31 +24,12 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 /**
- * Oauth2 authorization server. We split the API examples into two clients:
- *
- * <h2>Internal client</h2>
+ * Oauth2 authorization server with internal client.
  * <p>
- * First one will be used for internal client authorization. Internal client is the one we trust to get username and password from user
- * and usually it's out own web or mobile ui. For this client we'd like the application to work in the same way as the
- * default application authorized by session and cookie. I.e. we want the client to be automatically logged out in 30 mins after the
- * last click in the app.
+ * Internal client is the one we trust to get username and password from user and usually it's out own web or mobile ui. For this client
+ * we'd like the application to work in the same way as the default application authorized by session and cookie. I.e. we want the client
+ * to be automatically logged out in 30 mins after the last click in the app.
  * </p>
- *
- * <h2>External client</h2>
- * <p>
- * The second one is an example of how to connect app with external applications, which are those we don't trust to get username and
- * password from the user and they work with access token oauth2 workflow instead with seaprate scopes approval. This application we
- * want to get access token for longer time and be only once authorized and then to have contant access to our API. Only if the user
- * doesn't use it for 14 or more days, we log him out and require second authorization after he is back.
- * </p>
- *
- * <h2>With following scopes</h2>
- *
- * <ol>
- *     <li>account - access to user account data</li>
- *     <li>contacts - can get contacts list</li>
- *     <li>internal - can do things only internal client can do (like change password)</li>
- * </ol>
  *
  * @author Lukasz Frankowski (lifeinide.com)
  */
@@ -103,18 +83,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 			.authorizedGrantTypes("refresh_token", "password") // to get the access token uses directly username+password
 			.autoApprove(true) // all scopes are auto approved for internal client (no scopes approval view is displayed)
 			.accessTokenValiditySeconds(10*60) // by default for the internal client access token will expiry after 10 min
-			.refreshTokenValiditySeconds(30*60) // by default for the internal client refresh token will expiry after 30 min
-			.and()
-
-			// exernal client config
-
-			.withClient("external")
-			.secret("external_secret")
-			.scopes("account", "contacts") // does not have internal scope which is only for internal clients
-			.authorizedGrantTypes("authorization_code", "refresh_token") // to get the access token uses authorization code workflow
-			.autoApprove(false) // all scopes need to be approved manually
-			.accessTokenValiditySeconds(30*60) // by default for the external client access token will expiry after 30 min
-			.refreshTokenValiditySeconds(14*24*60*60); // by default for the internal client refresh token will expiry after 14 days
+			.refreshTokenValiditySeconds(30*60); // by default for the internal client refresh token will expiry after 30 min
 
 
 	}
@@ -159,25 +128,25 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
-		http
-			.sessionManagement()
-				// without this login form doesn't work because http.securityContext().securityContextRepository()==NullSecurityContextRepository
-				.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-				.and()
-			.authorizeRequests()
-				.antMatchers("/", "/login", "/favicon.ico")
-				.permitAll()
-				.and()
-			.authorizeRequests()
-				.anyRequest()
-				.authenticated()
-				.and()
-			.formLogin()
-				// TODOLF this doesn't set login redirect URL,please check LoginUrlAuthenticationEntryPoint:96 and 175, there
-				// TODOLF are three LoginUrlAuthenticationEntryPoint, but only one will get this URL, the rest of the stays with
-				// TODOLF /login and this is still used in authentication
-				.loginPage("http://localhost:8080/as/login")
-				.permitAll();
+//		http
+//			.sessionManagement()
+//				// without this login form doesn't work because http.securityContext().securityContextRepository()==NullSecurityContextRepository
+//				.sessionCreationPolicy(SessionCreationPolicy.NEVER)
+//				.and()
+//			.authorizeRequests()
+//				.antMatchers("/", "/login", "/favicon.ico")
+//				.permitAll()
+//				.and()
+//			.authorizeRequests()
+//				.anyRequest()
+//				.authenticated()
+//				.and()
+//			.formLogin()
+//				// TODOLF this doesn't set login redirect URL,please check LoginUrlAuthenticationEntryPoint:96 and 175, there
+//				// TODOLF are three LoginUrlAuthenticationEntryPoint, but only one will get this URL, the rest of the stays with
+//				// TODOLF /login and this is still used in authentication
+//				.loginPage("http://localhost:8080/as/login")
+//				.permitAll();
 	}
 
 	@Override
