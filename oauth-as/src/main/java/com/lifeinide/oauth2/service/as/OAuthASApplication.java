@@ -1,10 +1,8 @@
 package com.lifeinide.oauth2.service.as;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -42,7 +40,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * Some additional beans we need
 	 **********************************************************************************************************/
 
-	@Autowired protected AuthenticationManager authenticationManager;
+//	@Autowired protected AuthenticationManager authenticationManager; // TODOLF step 1
 
 	/**
 	 * Example user details service, in real life connected to some db.
@@ -116,9 +114,9 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints
-			.authenticationManager(authenticationManager)
-			.userDetailsService(userDetailsService())
-			.reuseRefreshTokens(false);
+//			.authenticationManager(authenticationManager) // TODOLF step 1
+			.userDetailsService(userDetailsService());
+//			.reuseRefreshTokens(false); // TODOLF step 2
 
 	}
 
@@ -128,6 +126,10 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
+		http
+			.authorizeRequests()
+			.anyRequest()
+			.authenticated();
 //		http
 //			.sessionManagement()
 //				// without this login form doesn't work because http.securityContext().securityContextRepository()==NullSecurityContextRepository
@@ -161,16 +163,16 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * See https://github.com/spring-projects/spring-boot/issues/11136
 	 **********************************************************************************************************/
 
-	@Configuration
-	public static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
-
-		@Bean
-		@Override
-		public AuthenticationManager authenticationManagerBean() throws Exception {
-			return super.authenticationManagerBean();
-		}
-		
-	}
+//	@Configuration
+//	public static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
+//
+//		@Bean
+//		@Override
+//		public AuthenticationManager authenticationManagerBean() throws Exception {
+//			return super.authenticationManagerBean();
+//		}
+//
+//	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(OAuthASApplication.class, args);
