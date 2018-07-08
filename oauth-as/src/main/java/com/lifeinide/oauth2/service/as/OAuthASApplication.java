@@ -117,9 +117,8 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints
 			.authenticationManager(authenticationManager) 
-			.userDetailsService(userDetailsService());
-//			.reuseRefreshTokens(false); // TODOLF step 3
-
+			.userDetailsService(userDetailsService())
+			.reuseRefreshTokens(false);
 	}
 
 	/**********************************************************************************************************
