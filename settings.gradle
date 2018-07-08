@@ -3,7 +3,5 @@ rootProject.name = 'zuul-oauth2-example'
 include 'zuul'
 include 'oauth-as'
 include 'oauth-rs'
-include 'internal'
-include 'external'
 
 

@@ -13,7 +13,3 @@ zuul:
       path: /rs/**
       url: http://localhost:8083
 
-    oauth-internal:
-      path: /**
-      url: http://localhost:8084
-

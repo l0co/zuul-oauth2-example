@@ -1,8 +1,0 @@
-server:
-  port: 8084
-
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
