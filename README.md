@@ -1,6 +1,8 @@
 # zuul-oauth2-example
 
-This is the example of using oauth2 authorization server with separate resource server behind Zuul proxy. It supports internal client authorization workflow (`grant_type = password`) with example usages. 
+This is the example of using oauth2 authorization server with separate resource server behind Zuul proxy. It supports internal client authorization workflow (`grant_type = password`) with example usages.
+
+**TODO: add article link**  
 
 ## Components
 
