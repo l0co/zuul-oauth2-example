@@ -1,14 +1,17 @@
 package com.lifeinide.oauth2.service.as;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
@@ -39,7 +42,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * Some additional beans we need
 	 **********************************************************************************************************/
 
-//	@Autowired protected AuthenticationManager authenticationManager; // TODOLF step 1
+	@Autowired protected AuthenticationManager authenticationManager;
 
 	/**
 	 * Example user details service, in real life connected to some db.
@@ -91,11 +94,10 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * client to encode password before sends it, because it makes no sense. This default encoder for
 	 * {@link AuthorizationServerSecurityConfigurer} looks like a spring security oauth2 glitch.
 	 */
-	// TODOLF step 2
 	@SuppressWarnings("deprecation")
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-//		security.passwordEncoder(NoOpPasswordEncoder.getInstance());
+		security.passwordEncoder(NoOpPasswordEncoder.getInstance());
 	}
 
 	/**
@@ -114,7 +116,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 		endpoints
-//			.authenticationManager(authenticationManager) // TODOLF step 1
+			.authenticationManager(authenticationManager) 
 			.userDetailsService(userDetailsService());
 //			.reuseRefreshTokens(false); // TODOLF step 3
 
@@ -129,31 +131,12 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 		http
 			.authorizeRequests()
 			.anyRequest()
-			.authenticated();
-//		http
-//			.sessionManagement()
-//				// without this login form doesn't work because http.securityContext().securityContextRepository()==NullSecurityContextRepository
-//				.sessionCreationPolicy(SessionCreationPolicy.NEVER)
-//				.and()
-//			.authorizeRequests()
-//				.antMatchers("/", "/login", "/favicon.ico")
-//				.permitAll()
-//				.and()
-//			.authorizeRequests()
-//				.anyRequest()
-//				.authenticated()
-//				.and()
-//			.formLogin()
-//				// TODOLF this doesn't set login redirect URL,please check LoginUrlAuthenticationEntryPoint:96 and 175, there
-//				// TODOLF are three LoginUrlAuthenticationEntryPoint, but only one will get this URL, the rest of the stays with
-//				// TODOLF /login and this is still used in authentication
-//				.loginPage("http://localhost:8080/as/login")
-//				.permitAll();
-	}
+			.authenticated();	}
 
 	@Override
 	public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
 	}
+
 
 	/**********************************************************************************************************
 	 * {@link WebSecurityConfigurerAdapter} = another security configuration?
@@ -163,16 +146,16 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * See https://github.com/spring-projects/spring-boot/issues/11136
 	 **********************************************************************************************************/
 
-//	@Configuration
-//	public static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
-//
-//		@Bean
-//		@Override
-//		public AuthenticationManager authenticationManagerBean() throws Exception {
-//			return super.authenticationManagerBean();
-//		}
-//
-//	}
+	@Configuration
+	public static class AuthenticationMananagerProvider extends WebSecurityConfigurerAdapter {
+
+		@Bean
+		@Override
+		public AuthenticationManager authenticationManagerBean() throws Exception {
+			return super.authenticationManagerBean();
+		}
+
+	}
 
 	public static void main(String[] args) {
 		SpringApplication.run(OAuthASApplication.class, args);
