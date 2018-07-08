@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
@@ -92,10 +91,11 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 	 * client to encode password before sends it, because it makes no sense. This default encoder for
 	 * {@link AuthorizationServerSecurityConfigurer} looks like a spring security oauth2 glitch.
 	 */
+	// TODOLF step 2
 	@SuppressWarnings("deprecation")
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-		security.passwordEncoder(NoOpPasswordEncoder.getInstance());
+//		security.passwordEncoder(NoOpPasswordEncoder.getInstance());
 	}
 
 	/**
@@ -116,7 +116,7 @@ public class OAuthASApplication implements AuthorizationServerConfigurer, Resour
 		endpoints
 //			.authenticationManager(authenticationManager) // TODOLF step 1
 			.userDetailsService(userDetailsService());
-//			.reuseRefreshTokens(false); // TODOLF step 2
+//			.reuseRefreshTokens(false); // TODOLF step 3
 
 	}
 
