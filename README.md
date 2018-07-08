@@ -10,4 +10,4 @@ This is the example of using oauth2 authorization server with separate resource 
 
 ## How to use
 
-TODO
+You can start everything using `gradle --parallel bootRun` in the root directory.
