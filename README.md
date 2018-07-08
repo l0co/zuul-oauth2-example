@@ -1,8 +1,6 @@
 # zuul-oauth2-example
 
-This is the example of using oauth2 authorization server with separate resource server behind Zuul proxy. It supports internal client authorization workflow (`grant_type = password`) with example usages.
-
-**TODO: add article link**  
+This is the example of using oauth2 authorization server with separate resource server behind Zuul proxy. It supports internal client authorization workflow (`grant_type = password`) with example usages. The related article is [here](http://lifeinide.com/post/2018-04-14-spring-oauth2-zuul-internal-external-client-workflow/).
 
 ## Components
 
